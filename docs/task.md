@@ -1,0 +1,82 @@
+# Tasks
+
+- [x] Analyze Game Loop <!-- id: 0 -->
+    - [x] Confirm frame rate dependency in `game.js` <!-- id: 1 -->
+- [x] Implement Delta Time <!-- id: 2 -->
+    - [x] Modify `loop` to calculate `deltaTime` <!-- id: 3 -->
+    - [x] Update `update()` to use `deltaTime` <!-- id: 4 -->
+    - [x] Adjust physics constants for time-based movement <!-- id: 5 -->
+- [x] Verify Fix <!-- id: 6 -->
+    - [x] Check consistency across refresh rates (simulated) <!-- id: 7 -->
+- [x] Adjust Damage Mechanics <!-- id: 8 -->
+    - [x] Reduce rumor damage by 50% when confusion > 66 <!-- id: 9 -->
+    - [x] Verify damage reduction <!-- id: 10 -->
+- [x] Design Game Over Sounds <!-- id: 11 -->
+    - [x] Create `sound_preview.html` with 5 options <!-- id: 12 -->
+    - [x] User selected Option 5 (Disconnect) - Refining... <!-- id: 13 -->
+    - [x] Create `sound_preview.html` with 5 "Disconnect" variations <!-- id: 14 -->
+    - [x] User selected Option 4 (Rhythmic Fade) - Extending... <!-- id: 15 -->
+    - [x] Create `sound_preview.html` with 5 longer "Rhythmic Fade" variations <!-- id: 16 -->
+    - [x] User selected Option 5 (Heavy Sub Fade) <!-- id: 17 -->
+- [x] Implement Selected Sound <!-- id: 18 -->
+    - [x] Add `stopAllSounds()` to `AudioEngine` <!-- id: 19 -->
+    - [x] Add `playGameOverSound()` with selected option <!-- id: 20 -->
+    - [x] Trigger in `gameOver()` <!-- id: 21 -->
+- [x] Verify Sound Implementation <!-- id: 22 -->
+- [x] Fix Audio Leak <!-- id: 23 -->
+    - [x] Refactor `init` to optionally skip ambience <!-- id: 24 -->
+    - [x] Clear rain interval in `stopAllSounds` <!-- id: 25 -->
+    - [x] Verify audio stops correctly <!-- id: 26 -->
+- [x] Refine Ambient Audio <!-- id: 27 -->
+    - [x] Create `sound_preview_ambience.html` with 5 variations <!-- id: 28 -->
+    - [x] User selected Option 1 (Relaxed) <!-- id: 29 -->
+    - [x] Implement selected ambience timing (1200ms) <!-- id: 30 -->
+- [x] Verify Ambience Change <!-- id: 31 -->
+- [x] Increase Difficulty <!-- id: 32 -->
+    - [x] Add 1 additional rumor to initialization <!-- id: 33 -->
+    - [x] Verify game loads with more rumors <!-- id: 34 -->
+- [x] Adjust Rumor Size <!-- id: 35 -->
+    - [x] Increase initial rumor size by 10% <!-- id: 36 -->
+- [x] Adjust Rumor Size <!-- id: 35 -->
+    - [x] Increase initial rumor size by 10% <!-- id: 36 -->
+    - [x] Verify visual change <!-- id: 37 -->
+- [x] Update Rumor Texts <!-- id: 38 -->
+    - [x] Replace `rumorTexts` with new list <!-- id: 39 -->
+- [x] Update Rumor Texts <!-- id: 38 -->
+    - [x] Replace `rumorTexts` with new list <!-- id: 39 -->
+    - [x] Verify new texts appear in game <!-- id: 40 -->
+- [x] Decrease Difficulty <!-- id: 41 -->
+    - [x] Reduce rumor count by 1 (back to 13) <!-- id: 42 -->
+- [x] Decrease Difficulty <!-- id: 41 -->
+    - [x] Reduce rumor count by 1 (back to 13) <!-- id: 42 -->
+- [x] Decrease Difficulty <!-- id: 41 -->
+    - [x] Reduce rumor count by 1 (back to 13) <!-- id: 42 -->
+    - [x] Verify game loads <!-- id: 43 -->
+- [x] Decrease Difficulty Further <!-- id: 44 -->
+    - [x] Reduce rumor count by 2 (down to 11) <!-- id: 45 -->
+- [x] Adjust Rumor Growth <!-- id: 46 -->
+    - [x] Increase `stressScaleMultiplier` growth factor by 30% <!-- id: 47 -->
+- [x] Adjust Rumor Growth <!-- id: 46 -->
+    - [x] Increase `stressScaleMultiplier` growth factor by 30% <!-- id: 47 -->
+- [x] Adjust Rumor Growth <!-- id: 46 -->
+    - [x] Increase `stressScaleMultiplier` growth factor by 30% <!-- id: 47 -->
+    - [x] Verify visual growth at high confusion <!-- id: 48 -->
+- [x] Update Anchor Texts <!-- id: 49 -->
+    - [x] Replace `anchorTexts` with new list <!-- id: 50 -->
+- [x] Update Anchor Texts <!-- id: 49 -->
+    - [x] Replace `anchorTexts` with new list <!-- id: 50 -->
+- [x] Update Anchor Texts <!-- id: 49 -->
+    - [x] Replace `anchorTexts` with new list <!-- id: 50 -->
+    - [x] Verify new texts appear in game <!-- id: 51 -->
+- [ ] Design Healing Animations <!-- id: 52 -->
+    - [x] Create `healing_preview.html` with 5 options <!-- id: 53 -->
+    - [x] User selection (Requested Hearts + Rainbows) <!-- id: 54 -->
+- [x] Create `healing_preview.html` with Hearts & Rainbows variations <!-- id: 56 -->
+- [x] Implement selected animation in `game.js` <!-- id: 55 -->
+- [x] Implement selected animation in `game.js` <!-- id: 55 -->
+- [x] Verify healing animation in game <!-- id: 57 -->
+- [x] Update Game Instructions <!-- id: 58 -->
+    - [x] Replace start screen content with new text <!-- id: 59 -->
+- [x] Update Game Instructions <!-- id: 58 -->
+    - [x] Replace start screen content with new text <!-- id: 59 -->
+    - [x] Verify layout <!-- id: 60 -->
