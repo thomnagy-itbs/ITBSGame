@@ -1,0 +1,154 @@
+body {
+    margin: 0;
+    overflow: hidden;
+    background: radial-gradient(circle at center, #2b2d42 0%, #0f0e17 100%);
+    color: #fffffe;
+    font-family: 'Courier New', Courier, monospace;
+    user-select: none;
+}
+
+#gameCanvas {
+    display: block;
+}
+
+#ui-panel {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 340px;
+    padding: 15px;
+    background: rgba(15, 14, 23, 0.9);
+    border: 2px solid #3da9fc;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(61, 169, 252, 0.3);
+    z-index: 20;
+    backdrop-filter: blur(5px);
+    display: none;
+}
+
+#ui-title {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    color: #3da9fc;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+}
+
+#bar-container {
+    width: 100%;
+    height: 10px;
+    background-color: #16161a;
+    border: 1px solid #555;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+#bar-fill {
+    width: 100%;
+    height: 100%;
+    background-color: #2cb67d;
+    transition: width 0.2s;
+    box-shadow: 0 0 10px currentColor;
+}
+
+#status-label {
+    margin-top: 8px;
+    font-size: 12px;
+    text-align: right;
+    color: #94a1b2;
+}
+
+#start-screen,
+#overlay-msg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 14, 23, 0.98);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 50;
+    text-align: center;
+}
+
+#overlay-msg {
+    display: none;
+    background: rgba(0, 0, 0, 0.85);
+}
+
+h1 {
+    font-size: 40px;
+    color: #3da9fc;
+    text-shadow: 0 0 20px #3da9fc;
+    margin-bottom: 10px;
+}
+
+p {
+    font-size: 18px;
+    max-width: 600px;
+    line-height: 1.5;
+    color: #a7a9be;
+}
+
+button {
+    background: transparent;
+    border: 2px solid #2cb67d;
+    color: #2cb67d;
+    padding: 15px 40px;
+    font-family: inherit;
+    font-weight: bold;
+    font-size: 18px;
+    cursor: pointer;
+    margin-top: 30px;
+    transition: 0.2s;
+    text-transform: uppercase;
+    box-shadow: 0 0 10px rgba(44, 182, 125, 0.2);
+}
+
+button:hover {
+    background: #2cb67d;
+    color: #0f0e17;
+    box-shadow: 0 0 20px #2cb67d;
+}
+
+.key {
+    color: white;
+    border: 1px solid #555;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: #222;
+    font-size: 0.9em;
+}
+
+.legend {
+    font-size: 14px;
+    text-align: left;
+    background: #222;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #444;
+    margin-top: 20px;
+}
+
+.l-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 10px;
+    display: inline-block;
+    margin-top: 6px;
+    flex-shrink: 0;
+}

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hearts & Rainbows Preview</title>
+    <style>
+        body {
+            background-color: #111;
+            color: #eee;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        canvas {
+            border: 2px solid #333;
+            background-color: #000;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        button {
+            background-color: #333;
+            color: #fff;
+            border: 1px solid #555;
+            padding: 10px 20px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background-color: #555;
+            transform: scale(1.05);
+        }
+
+        button.active {
+            background-color: #0f0;
+            color: #000;
+            border-color: #0f0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Hearts & Rainbows Preview</h1>
+    <canvas id="previewCanvas" width="600" height="400"></canvas>
+    <div class="controls">
+        <button onclick="setMode(1)" id="btn1">1. Gentle Float</button>
+        <button onclick="setMode(2)" id="btn2">2. Joyful Burst</button>
+        <button onclick="setMode(3)" id="btn3">3. Spiral Magic</button>
+        <button onclick="setMode(4)" id="btn4">4. Raining Love</button>
+        <button onclick="setMode(5)" id="btn5">5. Bouncing Fun</button>
+    </div>
+    <p>Click on the canvas to trigger the effect manually!</p>
+
+    <script>
+        const canvas = document.getElementById('previewCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let currentMode = 1;
+
+        // Mock Colleague
+        const colleague = { x: 300, y: 200, size: 20 };
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+            document.getElementById(`btn${mode}`).classList.add('active');
+            triggerEffect(colleague.x, colleague.y);
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            triggerEffect(e.clientX - rect.left, e.clientY - rect.top);
+        });
+
+        function triggerEffect(x, y) {
+            switch (currentMode) {
+                case 1: spawnGentleFloat(x, y); break;
+                case 2: spawnJoyfulBurst(x, y); break;
+                case 3: spawnSpiralMagic(x, y); break;
+                case 4: spawnRainingLove(x, y); break;
+                case 5: spawnBouncingFun(x, y); break;
+            }
+        }
+
+        function createParticle(x, y, type) {
+            return {
+                x: x, y: y,
+                vx: 0, vy: 0,
+                life: 1.0,
+                size: 10 + Math.random() * 10,
+                type: type, // 'heart' or 'rainbow'
+                color: `hsl(${330 + Math.random() * 30}, 100%, 70%)`, // Pinkish for hearts
+                rotation: (Math.random() - 0.5) * 0.5
+            };
+        }
+
+        function spawnGentleFloat(x, y) {
+            for (let i = 0; i < 12; i++) {
+                let p = createParticle(x + (Math.random() - 0.5) * 40, y + (Math.random() - 0.5) * 40, Math.random() > 0.5 ? 'heart' : 'rainbow');
+                p.vx = (Math.random() - 0.5) * 1;
+                p.vy = -1 - Math.random() * 2;
+                p.decay = 0.01;
+                particles.push(p);
+            }
+        }
+
+        function spawnJoyfulBurst(x, y) {
+            for (let i = 0; i < 20; i++) {
+                let p = createParticle(x, y, Math.random() > 0.5 ? 'heart' : 'rainbow');
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 1 + Math.random() * 4;
+                p.vx = Math.cos(angle) * speed;
+                p.vy = Math.sin(angle) * speed;
+                p.decay = 0.02;
+                particles.push(p);
+            }
+        }
+
+        function spawnSpiralMagic(x, y) {
+            for (let i = 0; i < 20; i++) {
+                let p = createParticle(x, y, i % 2 === 0 ? 'heart' : 'rainbow');
+                const angle = (i / 20) * Math.PI * 2;
+                const speed = 3;
+                p.vx = Math.cos(angle) * speed;
+                p.vy = Math.sin(angle) * speed;
+                p.decay = 0.015;
+                p.spiral = true; // Custom flag for spiral movement
+                p.initialAngle = angle;
+                particles.push(p);
+            }
+        }
+
+        function spawnRainingLove(x, y) {
+            for (let i = 0; i < 15; i++) {
+                let p = createParticle(x + (Math.random() - 0.5) * 60, y - 50, Math.random() > 0.5 ? 'heart' : 'rainbow');
+                p.vx = 0;
+                p.vy = 2 + Math.random() * 3;
+                p.decay = 0.015;
+                particles.push(p);
+            }
+        }
+
+        function spawnBouncingFun(x, y) {
+            for (let i = 0; i < 10; i++) {
+                let p = createParticle(x, y, Math.random() > 0.5 ? 'heart' : 'rainbow');
+                p.vx = (Math.random() - 0.5) * 6;
+                p.vy = -3 - Math.random() * 3;
+                p.gravity = 0.2;
+                p.decay = 0.01;
+                particles.push(p);
+            }
+        }
+
+        function drawHeart(ctx, x, y, size, color) {
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            const topCurveHeight = size * 0.3;
+            ctx.moveTo(x, y + topCurveHeight);
+            ctx.bezierCurveTo(x, y, x - size / 2, y, x - size / 2, y + topCurveHeight);
+            ctx.bezierCurveTo(x - size / 2, y + (size + topCurveHeight) / 2, x, y + (size + topCurveHeight) / 2, x, y + size);
+            ctx.bezierCurveTo(x, y + (size + topCurveHeight) / 2, x + size / 2, y + (size + topCurveHeight) / 2, x + size / 2, y + topCurveHeight);
+            ctx.bezierCurveTo(x + size / 2, y, x, y, x, y + topCurveHeight);
+            ctx.fill();
+        }
+
+        function drawRainbow(ctx, x, y, size) {
+            ctx.save();
+            ctx.translate(x, y);
+            // Draw 3 pastel bands
+            const colors = ['#FF9AA2', '#FFDAC1', '#B5EAD7']; // Pastel Red, Orange/Yellow, Green/Blue
+            const bandWidth = size / 4;
+
+            for (let i = 0; i < 3; i++) {
+                ctx.beginPath();
+                ctx.arc(0, 0, size - (i * bandWidth), Math.PI, 0);
+                ctx.strokeStyle = colors[i];
+                ctx.lineWidth = bandWidth;
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+
+        function update() {
+            ctx.fillStyle = '#111';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Colleague
+            ctx.fillStyle = '#44f';
+            ctx.beginPath();
+            ctx.arc(colleague.x, colleague.y, colleague.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.font = '20px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('😐', colleague.x, colleague.y + 7);
+
+
+            // Update and Draw Particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+
+                p.life -= p.decay;
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                    continue;
+                }
+
+                if (p.gravity) p.vy += p.gravity;
+
+                if (p.spiral) {
+                    // Spiral logic could go here, but simple expansion is fine for now
+                }
+
+                p.x += p.vx;
+                p.y += p.vy;
+
+                ctx.globalAlpha = p.life;
+
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.rotation);
+
+                if (p.type === 'heart') {
+                    drawHeart(ctx, 0, -p.size / 2, p.size, p.color);
+                } else if (p.type === 'rainbow') {
+                    drawRainbow(ctx, 0, 0, p.size);
+                }
+
+                ctx.restore();
+                ctx.globalAlpha = 1.0;
+            }
+
+            requestAnimationFrame(update);
+        }
+
+        // Init
+        setMode(1);
+        update();
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Sound Preview - Rhythmic Fade Extended</title>
+    <style>
+        body {
+            background: #0f0e17;
+            color: #fffffe;
+            font-family: 'Courier New', monospace;
+            padding: 40px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #3da9fc;
+        }
+
+        button {
+            display: block;
+            width: 400px;
+            margin: 20px auto;
+            padding: 15px;
+            background: transparent;
+            border: 2px solid #2cb67d;
+            color: #2cb67d;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #2cb67d;
+            color: #0f0e17;
+        }
+
+        .stop-btn {
+            border-color: #ef4565;
+            color: #ef4565;
+            margin-top: 40px;
+        }
+
+        .stop-btn:hover {
+            background: #ef4565;
+            color: #fffffe;
+        }
+
+        .desc {
+            font-size: 12px;
+            color: #94a1b2;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Rhythmic Fade Extended</h1>
+    <p>Longer variations of the rhythmic fade out.</p>
+
+    <div class="desc">Extended Duration (Double length)</div>
+    <button onclick="playOption(1)">Var 1: Extended Fade</button>
+
+    <div class="desc">Slower Tempo (More space between pulses)</div>
+    <button onclick="playOption(2)">Var 2: Slow Pulse</button>
+
+    <div class="desc">With Pitch Wobble (Unstable system feel)</div>
+    <button onclick="playOption(3)">Var 3: Unstable Fade</button>
+
+    <div class="desc">With Echo/Delay (Spacious void feel)</div>
+    <button onclick="playOption(4)">Var 4: Echo Fade</button>
+
+    <div class="desc">With Deep Sub-Bass (Heavy impact)</div>
+    <button onclick="playOption(5)">Var 5: Heavy Sub Fade</button>
+
+    <button class="stop-btn" onclick="stopAll()">Stop All Sounds</button>
+
+    <script>
+        const AudioEngine = {
+            ctx: null, masterGain: null,
+            init: function () {
+                if (this.ctx) return;
+                window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                this.ctx = new AudioContext();
+                this.masterGain = this.ctx.createGain();
+                this.masterGain.gain.value = 0.5;
+                this.masterGain.connect(this.ctx.destination);
+            },
+            stopAll: function () {
+                if (this.ctx) {
+                    this.ctx.close();
+                    this.ctx = null;
+                }
+            },
+            // VAR 1: Extended Fade (Double length)
+            playVar1: function () {
+                this.init();
+                const now = this.ctx.currentTime;
+                const count = 16; // More pulses
+                for (let i = 0; i < count; i++) {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.value = 300 * Math.pow(0.85, i); // Slower pitch drop
+                    gain.gain.setValueAtTime(0.3 * Math.pow(0.8, i), now + i * 0.15); // Slower fade
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.15 + 0.12);
+                    osc.connect(gain); gain.connect(this.masterGain);
+                    osc.start(now + i * 0.15); osc.stop(now + i * 0.15 + 0.12);
+                }
+            },
+            // VAR 2: Slow Pulse (Slower tempo)
+            playVar2: function () {
+                this.init();
+                const now = this.ctx.currentTime;
+                const count = 12;
+                for (let i = 0; i < count; i++) {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.value = 300 * Math.pow(0.8, i);
+                    gain.gain.setValueAtTime(0.3 * Math.pow(0.8, i), now + i * 0.25); // More space between
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.25 + 0.2); // Longer notes
+                    osc.connect(gain); gain.connect(this.masterGain);
+                    osc.start(now + i * 0.25); osc.stop(now + i * 0.25 + 0.2);
+                }
+            },
+            // VAR 3: Unstable Fade (Pitch wobble)
+            playVar3: function () {
+                this.init();
+                const now = this.ctx.currentTime;
+                const count = 16;
+                for (let i = 0; i < count; i++) {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    // Random detune for instability
+                    const detune = (Math.random() - 0.5) * 50;
+                    osc.frequency.value = (300 * Math.pow(0.85, i)) + detune;
+
+                    gain.gain.setValueAtTime(0.3 * Math.pow(0.8, i), now + i * 0.15);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.15 + 0.12);
+                    osc.connect(gain); gain.connect(this.masterGain);
+                    osc.start(now + i * 0.15); osc.stop(now + i * 0.15 + 0.12);
+                }
+            },
+            // VAR 4: Echo Fade (Delay effect simulation)
+            playVar4: function () {
+                this.init();
+                const now = this.ctx.currentTime;
+                const count = 12;
+
+                // Create a delay line
+                const delay = this.ctx.createDelay();
+                delay.delayTime.value = 0.1;
+                const feedback = this.ctx.createGain();
+                feedback.gain.value = 0.4;
+                delay.connect(feedback);
+                feedback.connect(delay);
+                delay.connect(this.masterGain);
+
+                for (let i = 0; i < count; i++) {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.value = 300 * Math.pow(0.85, i);
+                    gain.gain.setValueAtTime(0.3 * Math.pow(0.8, i), now + i * 0.18);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.18 + 0.1);
+                    osc.connect(gain);
+                    gain.connect(this.masterGain);
+                    gain.connect(delay); // Send to delay
+                    osc.start(now + i * 0.18); osc.stop(now + i * 0.18 + 0.1);
+                }
+            },
+            // VAR 5: Heavy Sub Fade
+            playVar5: function () {
+                this.init();
+                const now = this.ctx.currentTime;
+
+                // Constant sub bass drone dropping in pitch
+                const sub = this.ctx.createOscillator();
+                const subGain = this.ctx.createGain();
+                sub.type = 'sine';
+                sub.frequency.setValueAtTime(100, now);
+                sub.frequency.exponentialRampToValueAtTime(30, now + 3.0);
+                subGain.gain.setValueAtTime(0.4, now);
+                subGain.gain.linearRampToValueAtTime(0, now + 3.0);
+                sub.connect(subGain); subGain.connect(this.masterGain);
+                sub.start(now); sub.stop(now + 3.0);
+
+                // Rhythmic pulses on top
+                const count = 16;
+                for (let i = 0; i < count; i++) {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.value = 300 * Math.pow(0.85, i);
+                    gain.gain.setValueAtTime(0.2 * Math.pow(0.8, i), now + i * 0.15);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.15 + 0.12);
+                    osc.connect(gain); gain.connect(this.masterGain);
+                    osc.start(now + i * 0.15); osc.stop(now + i * 0.15 + 0.12);
+                }
+            }
+        };
+
+        function playOption(n) {
+            AudioEngine.stopAll();
+            setTimeout(() => {
+                if (n === 1) AudioEngine.playVar1();
+                if (n === 2) AudioEngine.playVar2();
+                if (n === 3) AudioEngine.playVar3();
+                if (n === 4) AudioEngine.playVar4();
+                if (n === 5) AudioEngine.playVar5();
+            }, 100);
+        }
+
+        function stopAll() {
+            AudioEngine.stopAll();
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Ambience Preview</title>
+    <style>
+        body {
+            background: #0f0e17;
+            color: #fffffe;
+            font-family: 'Courier New', monospace;
+            padding: 40px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #3da9fc;
+        }
+
+        button {
+            display: block;
+            width: 400px;
+            margin: 20px auto;
+            padding: 15px;
+            background: transparent;
+            border: 2px solid #2cb67d;
+            color: #2cb67d;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #2cb67d;
+            color: #0f0e17;
+        }
+
+        .stop-btn {
+            border-color: #ef4565;
+            color: #ef4565;
+            margin-top: 40px;
+        }
+
+        .stop-btn:hover {
+            background: #ef4565;
+            color: #fffffe;
+        }
+
+        .desc {
+            font-size: 12px;
+            color: #94a1b2;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Ambience Timing Preview</h1>
+    <p>Testing different intervals for the background "rain" notes.</p>
+
+    <div class="desc">Current: Interval 800ms, 60% chance (~1.3s avg)</div>
+    <button onclick="playOption(0)">Original (Reference)</button>
+
+    <div class="desc">Slightly Slower: Interval 1200ms, 60% chance (~2s avg)</div>
+    <button onclick="playOption(1)">Var 1: Relaxed</button>
+
+    <div class="desc">Much Slower: Interval 2000ms, 60% chance (~3.3s avg)</div>
+    <button onclick="playOption(2)">Var 2: Slow</button>
+
+    <div class="desc">Sparse: Interval 1500ms, 40% chance (~3.75s avg)</div>
+    <button onclick="playOption(3)">Var 3: Sparse</button>
+
+    <div class="desc">Very Sparse: Interval 3000ms, 50% chance (~6s avg)</div>
+    <button onclick="playOption(4)">Var 4: Deep Space</button>
+
+    <div class="desc">Randomized: 1s - 4s random delay</div>
+    <button onclick="playOption(5)">Var 5: Organic/Random</button>
+
+    <button class="stop-btn" onclick="stopAll()">Stop All Sounds</button>
+
+    <script>
+        const AudioEngine = {
+            ctx: null, masterGain: null, rainInterval: null,
+            delayNode: null, feedbackNode: null, delayFilter: null,
+            SCALE: { C2: 65.41, G2: 98.00, C3: 130.81, Eb3: 155.56, F3: 174.61, G3: 196.00, Bb3: 233.08, C4: 261.63, Eb4: 311.13, F4: 349.23, G4: 392.00, Bb4: 466.16, C5: 523.25, Eb5: 622.25 },
+
+            init: function () {
+                if (this.ctx) return;
+                window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                this.ctx = new AudioContext();
+                this.masterGain = this.ctx.createGain();
+                this.masterGain.gain.value = 0.5;
+                this.masterGain.connect(this.ctx.destination);
+                this.setupDelayChain();
+            },
+            stopAll: function () {
+                if (this.rainInterval) {
+                    clearInterval(this.rainInterval);
+                    clearTimeout(this.rainInterval); // For Var 5
+                }
+                if (this.ctx) {
+                    this.ctx.close();
+                    this.ctx = null;
+                }
+            },
+            setupDelayChain: function () {
+                this.delayNode = this.ctx.createDelay(); this.delayNode.delayTime.value = 0.45;
+                this.feedbackNode = this.ctx.createGain(); this.feedbackNode.gain.value = 0.4;
+                this.delayFilter = this.ctx.createBiquadFilter(); this.delayFilter.frequency.value = 1000;
+                this.delayNode.connect(this.feedbackNode); this.feedbackNode.connect(this.delayFilter);
+                this.delayFilter.connect(this.delayNode); this.delayNode.connect(this.masterGain);
+            },
+            triggerRainNote: function () {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator(); const env = this.ctx.createGain();
+                const k = ['C4', 'Eb4', 'F4', 'G4', 'Bb4', 'C5', 'Eb5'];
+                osc.frequency.value = this.SCALE[k[Math.floor(Math.random() * k.length)]]; osc.type = 'sine';
+                env.gain.setValueAtTime(0, this.ctx.currentTime); env.gain.linearRampToValueAtTime(0.1, this.ctx.currentTime + 0.02);
+                env.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 1.5);
+                osc.connect(env); env.connect(this.masterGain); env.connect(this.delayNode);
+                osc.start(); osc.stop(this.ctx.currentTime + 1.5);
+            },
+            // VAR 0: Original
+            playVar0: function () {
+                this.init();
+                this.rainInterval = setInterval(() => { if (Math.random() > 0.4) this.triggerRainNote(); }, 800);
+            },
+            // VAR 1: Relaxed
+            playVar1: function () {
+                this.init();
+                this.rainInterval = setInterval(() => { if (Math.random() > 0.4) this.triggerRainNote(); }, 1200);
+            },
+            // VAR 2: Slow
+            playVar2: function () {
+                this.init();
+                this.rainInterval = setInterval(() => { if (Math.random() > 0.4) this.triggerRainNote(); }, 2000);
+            },
+            // VAR 3: Sparse
+            playVar3: function () {
+                this.init();
+                this.rainInterval = setInterval(() => { if (Math.random() > 0.6) this.triggerRainNote(); }, 1500);
+            },
+            // VAR 4: Deep Space
+            playVar4: function () {
+                this.init();
+                this.rainInterval = setInterval(() => { if (Math.random() > 0.5) this.triggerRainNote(); }, 3000);
+            },
+            // VAR 5: Organic/Random
+            playVar5: function () {
+                this.init();
+                const loop = () => {
+                    this.triggerRainNote();
+                    const nextTime = 1000 + Math.random() * 3000; // 1s to 4s delay
+                    this.rainInterval = setTimeout(loop, nextTime);
+                };
+                loop();
+            }
+        };
+
+        function playOption(n) {
+            AudioEngine.stopAll();
+            setTimeout(() => {
+                if (n === 0) AudioEngine.playVar0();
+                if (n === 1) AudioEngine.playVar1();
+                if (n === 2) AudioEngine.playVar2();
+                if (n === 3) AudioEngine.playVar3();
+                if (n === 4) AudioEngine.playVar4();
+                if (n === 5) AudioEngine.playVar5();
+            }, 100);
+        }
+
+        function stopAll() {
+            AudioEngine.stopAll();
+        }
+    </script>
+</body>
+
+</html>

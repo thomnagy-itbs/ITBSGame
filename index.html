@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITBS - System Restore (Controlled Impact)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div id="start-screen">
+        <h1>ITBS // INNERER KOMPASS</h1>
+        <p>"Du kannst den Sturm der Reorganisation nicht kontrollieren.<br>
+            Du kannst nur kontrollieren, worauf du deinen Fokus richtest."</p>
+
+        <div class="legend">
+            <div class="l-item">
+                <span class="dot" style="background:#3da9fc"></span>
+                <div><strong>FINDE SINN (DEIN EINFLUSSBEREICH)</strong><br>
+                    Bleib in den blauen Zonen. Hier schaffst du echten Wert (Deployments, User helfen). Das stabilisiert
+                    deine Mental Health.</div>
+            </div>
+            <div class="l-item">
+                <span class="dot" style="background:#ef4565"></span>
+                <div><strong>IGNORIERE DEN LÄRM (SORGENKREIS)</strong><br>
+                    Gerüchte, Ängste und Spekulationen rauben dir nur Energie. Weiche ihnen aus – sie ändern nichts an
+                    der Realität.</div>
+            </div>
+            <div class="l-item">
+                <span class="dot" style="background:#ff8906"></span>
+                <div><strong>TEILE DEINE RUHE (LEADERSHIP)</strong><br>
+                    Dein Team braucht keine Panik. Berühre gestresste Kollegen, um sie zu "erden" und den Fokus
+                    wiederherzustellen.</div>
+            </div>
+        </div>
+
+        <button id="btn-start">Fokus finden</button>
+    </div>
+
+    <div id="ui-panel">
+        <div id="ui-title">
+            <span>Mental Health</span>
+            <span id="server-count">0/4 SYSTEMS</span>
+        </div>
+        <div id="bar-container">
+            <div id="bar-fill"></div>
+        </div>
+        <div id="status-label">SYSTEM: STABIL</div>
+    </div>
+
+    <div id="overlay-msg">
+        <h1 id="msg-title">SYSTEM RESTORED</h1>
+        <p id="msg-desc">Alle Systeme laufen stabil.</p>
+        <button onclick="location.reload()">Reboot</button>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script src="game.js"></script>
+</body>
+
+</html>
