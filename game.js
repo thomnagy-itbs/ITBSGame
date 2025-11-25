@@ -376,6 +376,19 @@ function update(dt) {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // Draw Grid (Restored Element)
+    ctx.strokeStyle = 'rgba(255, 0, 255, 0.15)'; // Subtle Magenta
+    ctx.lineWidth = 1;
+    const gridSize = 50;
+    const offset = (gameTime * 20) % gridSize;
+
+    for (let x = 0; x < canvas.width; x += gridSize) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+    }
+    for (let y = offset; y < canvas.height; y += gridSize) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+    }
+
     anchors.forEach(a => {
         ctx.save(); ctx.translate(a.x, a.y);
         let mainColor = a.isComplete ? COLORS.anchorDone : (a.progress > 0 ? COLORS.anchorCharging : COLORS.anchorPending);
