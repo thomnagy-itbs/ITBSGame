@@ -154,11 +154,11 @@ const rumorTexts = [
     "Brain Drain", "Politics", "Ungewissheit", "Planlosigkeit"
 ];
 const anchorTexts = [
-    "Ticket schliessen", "Erfolgreich deployen", "User glücklich machen", "Design implementieren",
-    "User durchführen", "User verstehen", "Klar kommunizieren", "Ruhig bleiben",
+    "Ticket schliessen", "Erfolgreich deployen", "User verstehen", "Design implementieren",
+    "User Test durchführen", "Klar kommunizieren", "Ruhig bleiben",
     "Bug fixen", "Legacy Code löschen", "Automatisieren", "Wissen teilen",
     "Danke sagen", "Ehrliches Feedback", "Zuhören", "Kaffee holen",
-    "Nein sagen", "Fokus finden", "Priorisieren"
+    "Nein sagen", "Fokus finden", "Priorisieren", "BuyIT erstellen"
 ];
 const rumors = [];
 const anchors = [];
@@ -173,7 +173,7 @@ function initGame() {
             x: Math.random() * canvas.width, y: Math.random() * canvas.height,
             text: rumorTexts[Math.floor(Math.random() * rumorTexts.length)],
             vx: (Math.random() - 0.5) * 1.5, vy: (Math.random() - 0.5) * 1.5,
-            size: (14 + Math.random() * 8) * 1.1, pulseOffset: Math.random() * 10, debrisAngle: Math.random() * Math.PI,
+            size: 25 + Math.pow(Math.random(), 2) * 30, pulseOffset: Math.random() * 10, debrisAngle: Math.random() * Math.PI,
             // NEW: Push force vectors
             pushX: 0, pushY: 0
         });
@@ -194,11 +194,16 @@ function createAnchors() {
         [pad, midX - pad, pad, midY - pad], [midX + pad, canvas.width - pad, pad, midY - pad],
         [pad, midX - pad, midY + pad, canvas.height - pad], [midX + pad, canvas.width - pad, midY + pad, canvas.height - pad]
     ];
+
+    // Shuffle anchorTexts to get unique random texts each game
+    let availableTexts = [...anchorTexts].sort(() => 0.5 - Math.random());
+
     quadrants.forEach((q, index) => {
         anchors.push({
             x: q[0] + Math.random() * (q[1] - q[0]), y: q[2] + Math.random() * (q[3] - q[2]),
-            text: anchorTexts[index], radius: 60, rotation: Math.random() * Math.PI,
-            progress: 0, isComplete: false, lastNoteIndex: -1
+            text: availableTexts[index % availableTexts.length], radius: 60, rotation: Math.random() * Math.PI,
+            progress: 0, isComplete: false, lastNoteIndex: -1,
+            vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4
         });
     });
 }
@@ -280,7 +285,16 @@ function update(dt) {
             a.progress -= 0.5 * dt; let currentStep = Math.floor(a.progress / 20);
             if (currentStep < a.lastNoteIndex) a.lastNoteIndex = currentStep;
         }
+
+        // Anchor Physics (Drift & Bounce)
+        if (!a.isComplete) {
+            a.x += a.vx * dt; a.y += a.vy * dt;
+            if (a.x < 60 || a.x > canvas.width - 60) a.vx *= -1;
+            if (a.y < 60 || a.y > canvas.height - 60) a.vy *= -1;
+        }
     });
+
+    resolveCollisions(dt);
 
     let nearRumor = false;
     rumors.forEach(r => {
@@ -446,11 +460,19 @@ function draw() {
     rumors.forEach(r => {
         let pulse = Math.sin(gameTime * 2 + r.pulseOffset);
         let finalScale = (1 + pulse * 0.1) * stressScaleMultiplier;
-        let gradient = ctx.createRadialGradient(r.x, r.y, 10, r.x, r.y, 80 * finalScale);
-        gradient.addColorStop(0, COLORS.rumorDark); gradient.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = gradient; ctx.beginPath(); ctx.arc(r.x, r.y, 80 * finalScale, 0, Math.PI * 2); ctx.fill();
+        let collisionRadius = (r.size * 2.0) * finalScale; // EXACT match to collision logic
+        let auraRadius = collisionRadius;
 
-        ctx.font = `${Math.floor(r.size * Math.min(1.5, stressScaleMultiplier))}px Courier New`; ctx.textAlign = "center";
+        let gradient = ctx.createRadialGradient(r.x, r.y, 10, r.x, r.y, auraRadius);
+        gradient.addColorStop(0, COLORS.rumorDark);
+        gradient.addColorStop(0.8, 'rgba(42, 10, 18, 0.9)');
+        gradient.addColorStop(1, 'rgba(42, 10, 18, 0)');
+        ctx.fillStyle = gradient; ctx.beginPath(); ctx.arc(r.x, r.y, auraRadius, 0, Math.PI * 2); ctx.fill();
+
+        ctx.strokeStyle = 'rgba(239, 69, 101, 0.8)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(r.x, r.y, collisionRadius, 0, Math.PI * 2); ctx.stroke();
+
+        ctx.font = "bold 20px Courier New"; ctx.textAlign = "center";
         let rX = r.x + (Math.random() - 0.5) * (confusion > 50 ? 4 : 1);
         let rY = r.y + (Math.random() - 0.5) * (confusion > 50 ? 4 : 1);
         if (Math.random() > 0.8) { ctx.fillStyle = COLORS.rumorGlitch; ctx.fillText(r.text, rX + 2, rY); }
@@ -520,4 +542,62 @@ function loop(timestamp) {
 
     update(dt);
     draw();
+}
+
+function resolveCollisions(dt) {
+    // Rumor vs Rumor
+    for (let i = 0; i < rumors.length; i++) {
+        for (let j = i + 1; j < rumors.length; j++) {
+            let r1 = rumors[i]; let r2 = rumors[j];
+            let dx = r2.x - r1.x; let dy = r2.y - r1.y;
+            let dist = Math.hypot(dx, dy);
+            // Visual/Collision radius is size * 2.0
+            // We use a slightly smaller physics radius to allow some overlap before bounce
+            let r1Rad = r1.size * 2.0;
+            let r2Rad = r2.size * 2.0;
+            let minDist = r1Rad + r2Rad;
+
+            if (dist < minDist) {
+                let angle = Math.atan2(dy, dx);
+                let overlap = minDist - dist;
+
+                // Separate
+                let moveX = Math.cos(angle) * overlap * 0.5;
+                let moveY = Math.sin(angle) * overlap * 0.5;
+                r1.x -= moveX; r1.y -= moveY;
+                r2.x += moveX; r2.y += moveY;
+
+                // Elastic Bounce
+                let nx = Math.cos(angle); let ny = Math.sin(angle);
+                let p = 2 * (r1.vx * nx + r1.vy * ny - r2.vx * nx - r2.vy * ny) / (r1.size + r2.size);
+                r1.vx -= p * r2.size * nx; r1.vy -= p * r2.size * ny;
+                r2.vx += p * r1.size * nx; r2.vy += p * r1.size * ny;
+            }
+        }
+    }
+
+    // Rumor vs Anchor
+    rumors.forEach(r => {
+        let rRad = r.size * 2.0;
+        anchors.forEach(a => {
+            let dx = r.x - a.x; let dy = r.y - a.y;
+            let dist = Math.hypot(dx, dy);
+            let minDist = rRad + a.radius;
+
+            if (dist < minDist) {
+                let angle = Math.atan2(dy, dx);
+                let overlap = minDist - dist;
+
+                // Push Rumor out (Anchor is static/heavy)
+                r.x += Math.cos(angle) * overlap;
+                r.y += Math.sin(angle) * overlap;
+
+                // Reflect Velocity
+                let nx = Math.cos(angle); let ny = Math.sin(angle);
+                let dot = r.vx * nx + r.vy * ny;
+                r.vx = r.vx - 2 * dot * nx;
+                r.vy = r.vy - 2 * dot * ny;
+            }
+        });
+    });
 }
