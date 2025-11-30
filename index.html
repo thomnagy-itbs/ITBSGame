@@ -11,28 +11,24 @@
 <body>
 
     <div id="start-screen">
-        <h1>ITBS // INNERER KOMPASS</h1>
-        <p>"Du kannst den Sturm der Reorganisation nicht kontrollieren.<br>
-            Du kannst nur kontrollieren, worauf du deinen Fokus richtest."</p>
+        <h1>ITBS // FOKUS & RESILIENZ</h1>
+        <p>"Energie fließt dahin, worauf du deine Aufmerksamkeit richtest."</p>
 
         <div class="legend">
             <div class="l-item">
                 <span class="dot" style="background:#3da9fc"></span>
-                <div><strong>FINDE SINN (DEIN EINFLUSSBEREICH)</strong><br>
-                    Bleib in den blauen Zonen. Hier schaffst du echten Wert (Deployments, User helfen). Das stabilisiert
-                    deine Mental Health.</div>
+                <div><strong>WORK (FLOW)</strong><br>
+                    Erledige deine Aufgaben in den blauen Zonen. Hier bist du wirksam und sicher.</div>
             </div>
             <div class="l-item">
                 <span class="dot" style="background:#ef4565"></span>
-                <div><strong>IGNORIERE DEN LÄRM (SORGENKREIS)</strong><br>
-                    Gerüchte, Ängste und Spekulationen rauben dir nur Energie. Weiche ihnen aus – sie ändern nichts an
-                    der Realität.</div>
+                <div><strong>NOISE (GERÜCHTE)</strong><br>
+                    Ungewissheit und Sorgen. Je mehr Beachtung du ihnen schenkst, desto mächtiger werden sie.</div>
             </div>
             <div class="l-item">
                 <span class="dot" style="background:#ff8906"></span>
-                <div><strong>TEILE DEINE RUHE (LEADERSHIP)</strong><br>
-                    Dein Team braucht keine Panik. Berühre gestresste Kollegen, um sie zu "erden" und den Fokus
-                    wiederherzustellen.</div>
+                <div><strong>TEAM (LEADERSHIP)</strong><br>
+                    Ein kurzes Gespräch kann Panik lösen. Hilf deinen Kollegen, den Fokus wiederzufinden.</div>
             </div>
         </div>
 
@@ -52,8 +48,15 @@
 
     <div id="overlay-msg">
         <h1 id="msg-title">SYSTEM RESTORED</h1>
-        <p id="msg-desc">Alle Systeme laufen stabil.</p>
-        <button onclick="location.reload()">Reboot</button>
+        <p id="msg-desc">Die Geräusche waren zu laut.</p>
+
+        <div id="legacy-input-container" style="display: none; margin-top: 20px;">
+            <p style="font-size: 12px; color: #94a1b2; margin-bottom: 5px;">> WAS HAT DICH ABGELENKT?</p>
+            <input type="text" id="legacy-input" maxlength="20" placeholder="TYPE REASON..." autocomplete="off">
+            <button id="btn-submit-legacy">UPLOAD LOG</button>
+        </div>
+
+        <button id="btn-restart" onclick="location.reload()">REBOOT SYSTEM</button>
     </div>
 
     <canvas id="gameCanvas"></canvas>

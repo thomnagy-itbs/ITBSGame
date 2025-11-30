@@ -118,6 +118,33 @@ const AudioEngine = {
     }
 };
 
+
+// --- MOCK BACKEND ---
+const MockBackend = {
+    STORAGE_KEY: 'itbs_legacy_rumors',
+
+    getRumors: function () {
+        const stored = localStorage.getItem(this.STORAGE_KEY);
+        const customRumors = stored ? JSON.parse(stored) : [];
+        // Combine defaults with custom rumors (giving custom ones a higher chance if we wanted, 
+        // but for now just mixing them in)
+        return [...rumorTexts, ...customRumors];
+    },
+
+    addRumor: function (text) {
+        if (!text || text.trim() === "") return;
+        const cleanText = text.trim().substring(0, 20); // Limit length
+        const stored = localStorage.getItem(this.STORAGE_KEY);
+        const customRumors = stored ? JSON.parse(stored) : [];
+
+        // Avoid duplicates
+        if (!customRumors.includes(cleanText) && !rumorTexts.includes(cleanText)) {
+            customRumors.push(cleanText);
+            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(customRumors));
+        }
+    }
+};
+
 // --- GAME LOGIC ---
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -168,10 +195,11 @@ const shockwaves = [];
 const resonanceNotes = [AudioEngine.SCALE.C4, AudioEngine.SCALE.Eb4, AudioEngine.SCALE.G4, AudioEngine.SCALE.Bb4, AudioEngine.SCALE.C5];
 
 function initGame() {
+    const allRumors = MockBackend.getRumors();
     for (let i = 0; i < 11; i++) {
         rumors.push({
             x: Math.random() * canvas.width, y: Math.random() * canvas.height,
-            text: rumorTexts[Math.floor(Math.random() * rumorTexts.length)],
+            text: allRumors[Math.floor(Math.random() * allRumors.length)],
             vx: (Math.random() - 0.5) * 1.5, vy: (Math.random() - 0.5) * 1.5,
             size: 25 + Math.pow(Math.random(), 2) * 30, pulseOffset: Math.random() * 10, debrisAngle: Math.random() * Math.PI,
             // NEW: Push force vectors
@@ -215,6 +243,22 @@ btnStart.addEventListener('click', () => {
     initGame(); gameActive = true; requestAnimationFrame(loop);
 });
 
+document.getElementById('btn-submit-legacy').addEventListener('click', () => {
+    const input = document.getElementById('legacy-input');
+    const text = input.value;
+    if (text) {
+        MockBackend.addRumor(text);
+        input.value = ''; // Clear
+        location.reload(); // Simple reload to restart with new data
+    }
+});
+
+document.getElementById('legacy-input').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        document.getElementById('btn-submit-legacy').click();
+    }
+});
+
 function spawnParticles(x, y, color, count = 1) {
     for (let i = 0; i < count; i++) {
         particles.push({
@@ -232,13 +276,17 @@ function gameOver(won) {
     const msgDesc = document.getElementById('msg-desc');
     if (won) {
         AudioEngine.playWinChord();
-        msgTitle.innerText = "SYSTEME WIEDERHERGESTELLT"; msgTitle.style.color = COLORS.anchorDone;
-        msgDesc.innerText = "Du hast den Fokus bewahrt.";
+        msgTitle.innerText = "KLARHEIT GEFUNDEN"; msgTitle.style.color = COLORS.anchorDone;
+        msgDesc.innerText = "Du bist trotz Chaos wirksam geblieben.";
     } else {
         AudioEngine.stopAllSounds();
         AudioEngine.playGameOverSound();
-        msgTitle.innerText = "DISCONNECT"; msgTitle.style.color = COLORS.rumorCore;
-        msgDesc.innerText = "Die Geräusche waren zu laut.";
+        msgTitle.innerText = "FOKUS VERLOREN"; msgTitle.style.color = COLORS.rumorCore;
+        msgDesc.innerText = "Deine Energie ist im Chaos verpufft.";
+
+        // Show Legacy Input
+        document.getElementById('legacy-input-container').style.display = 'block';
+        document.getElementById('legacy-input').focus();
     }
 }
 

@@ -152,3 +152,45 @@ button:hover {
     margin-top: 6px;
     flex-shrink: 0;
 }
+
+/* Legacy Input Styles */
+#legacy-input-container {
+    width: 100%;
+    max-width: 300px;
+}
+
+#legacy-input {
+    background: rgba(15, 14, 23, 0.9);
+    border: 1px solid #ef4565;
+    color: #ef4565;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 16px;
+    padding: 10px;
+    width: 100%;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    outline: none;
+    box-shadow: 0 0 10px rgba(239, 69, 101, 0.2);
+}
+
+#legacy-input::placeholder {
+    color: rgba(239, 69, 101, 0.5);
+}
+
+#btn-submit-legacy {
+    background: #ef4565;
+    color: #fffffe;
+    border: none;
+    padding: 10px 20px;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    width: 100%;
+    transition: all 0.2s ease;
+}
+
+#btn-submit-legacy:hover {
+    background: #d02e4c;
+    box-shadow: 0 0 15px rgba(239, 69, 101, 0.6);
+}
