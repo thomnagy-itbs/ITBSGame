@@ -3,7 +3,7 @@ body {
     overflow: hidden;
     background: radial-gradient(circle at center, #2b2d42 0%, #0f0e17 100%);
     color: #fffffe;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     user-select: none;
 }
 
@@ -69,53 +69,67 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(15, 14, 23, 0.98);
+    background-color: #000;
+    /* The Void: Pure Black */
+    background-image: linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+    background-size: 50px 50px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     z-index: 50;
     text-align: center;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    /* The Void: Clean Sans */
 }
 
 #overlay-msg {
     display: none;
-    background: rgba(0, 0, 0, 0.85);
+    background: rgba(0, 0, 0, 0.9);
 }
 
 h1 {
-    font-size: 40px;
-    color: #3da9fc;
-    text-shadow: 0 0 20px #3da9fc;
-    margin-bottom: 10px;
+    font-weight: 100;
+    font-size: 60px;
+    letter-spacing: 4px;
+    color: #fff;
+    margin-bottom: 20px;
+    text-shadow: none;
+    /* Remove neon glow */
+    text-transform: uppercase;
 }
 
 p {
-    font-size: 18px;
-    max-width: 600px;
-    line-height: 1.5;
-    color: #a7a9be;
+    font-size: 14px;
+    max-width: 500px;
+    line-height: 1.6;
+    color: #666;
+    /* The Void: Subtle text */
+    margin-bottom: 40px;
 }
 
 button {
     background: transparent;
-    border: 2px solid #2cb67d;
-    color: #2cb67d;
-    padding: 15px 40px;
-    font-family: inherit;
-    font-weight: bold;
-    font-size: 18px;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 15px 50px;
+    font-family: 'Helvetica Neue', sans-serif;
+    font-weight: 300;
+    font-size: 14px;
+    letter-spacing: 2px;
     cursor: pointer;
-    margin-top: 30px;
-    transition: 0.2s;
+    margin-top: 40px;
+    transition: all 0.4s ease;
     text-transform: uppercase;
-    box-shadow: 0 0 10px rgba(44, 182, 125, 0.2);
+    box-shadow: none;
 }
 
 button:hover {
-    background: #2cb67d;
-    color: #0f0e17;
-    box-shadow: 0 0 20px #2cb67d;
+    border-color: #fff;
+    background: #fff;
+    color: #000;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
 }
 
 .key {
@@ -128,27 +142,44 @@ button:hover {
 }
 
 .legend {
-    font-size: 14px;
+    font-size: 13px;
     text-align: left;
-    background: #222;
-    padding: 15px;
-    border-radius: 8px;
-    border: 1px solid #444;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    border: none;
     margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 .l-item {
     display: flex;
     align-items: flex-start;
-    margin-bottom: 15px;
+    margin-bottom: 0;
+    color: #444;
+    /* Dark grey text for description */
+}
+
+.l-item strong {
+    color: #fff;
+    /* White text for titles */
+    font-weight: 400;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: 12px;
+    display: block;
+    margin-bottom: 4px;
 }
 
 .dot {
-    width: 10px;
-    height: 10px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
-    margin-right: 10px;
+    margin-right: 20px;
     display: inline-block;
-    margin-top: 6px;
+    margin-top: 5px;
     flex-shrink: 0;
+    opacity: 0.8;
 }

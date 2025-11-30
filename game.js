@@ -423,9 +423,9 @@ function draw() {
         ctx.fillStyle = a.isComplete ? 'rgba(44, 182, 125, 0.2)' : 'rgba(61, 169, 252, 0.1)';
         ctx.fill(); ctx.restore();
 
-        ctx.fillStyle = mainColor; ctx.font = "bold 14px Courier New"; ctx.textAlign = "center";
-        if (a.isComplete) { ctx.fillText("ONLINE", a.x, a.y + 5); ctx.font = "20px Courier New"; ctx.fillText("✓", a.x, a.y - 15); }
-        else if (a.progress > 0) { ctx.fillText(`${Math.floor(a.progress)}%`, a.x, a.y + 5); ctx.font = "10px Courier New"; ctx.fillText("SYNCING...", a.x, a.y - 15); }
+        ctx.fillStyle = mainColor; ctx.font = "100 14px 'Helvetica Neue', sans-serif"; ctx.textAlign = "center";
+        if (a.isComplete) { ctx.fillText("ONLINE", a.x, a.y + 5); ctx.font = "100 20px 'Helvetica Neue', sans-serif"; ctx.fillText("✓", a.x, a.y - 15); }
+        else if (a.progress > 0) { ctx.fillText(`${Math.floor(a.progress)}%`, a.x, a.y + 5); ctx.font = "100 10px 'Helvetica Neue', sans-serif"; ctx.fillText("SYNCING...", a.x, a.y - 15); }
         else ctx.fillText(a.text, a.x, a.y + 5);
     });
 
@@ -475,7 +475,7 @@ function draw() {
         ctx.strokeStyle = 'rgba(239, 69, 101, 0.8)'; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.arc(r.x, r.y, collisionRadius, 0, Math.PI * 2); ctx.stroke();
 
-        ctx.font = "bold 20px Courier New"; ctx.textAlign = "center";
+        ctx.font = "100 20px 'Helvetica Neue', sans-serif"; ctx.textAlign = "center";
         let rX = r.x + (Math.random() - 0.5) * (confusion > 50 ? 4 : 1);
         let rY = r.y + (Math.random() - 0.5) * (confusion > 50 ? 4 : 1);
         if (Math.random() > 0.8) { ctx.fillStyle = COLORS.rumorGlitch; ctx.fillText(r.text, rX + 2, rY); }
