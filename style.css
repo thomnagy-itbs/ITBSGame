@@ -101,7 +101,7 @@ h1 {
 }
 
 p {
-    font-size: 14px;
+    font-size: 16px;
     max-width: 500px;
     line-height: 1.6;
     color: #666;
@@ -116,7 +116,7 @@ button {
     padding: 15px 50px;
     font-family: 'Helvetica Neue', sans-serif;
     font-weight: 300;
-    font-size: 14px;
+    font-size: 16px;
     letter-spacing: 2px;
     cursor: pointer;
     margin-top: 40px;
@@ -142,7 +142,7 @@ button:hover {
 }
 
 .legend {
-    font-size: 13px;
+    font-size: 17px;
     text-align: left;
     background: transparent;
     padding: 0;
@@ -168,7 +168,7 @@ button:hover {
     font-weight: 400;
     letter-spacing: 1px;
     text-transform: uppercase;
-    font-size: 12px;
+    font-size: 14px;
     display: block;
     margin-bottom: 4px;
 }
