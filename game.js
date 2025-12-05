@@ -143,12 +143,64 @@ const COLORS = {
     particles: ['#fffffe', '#2cb67d', '#3da9fc']
 };
 
-let player = { x: canvas.width / 2, y: canvas.height / 2, size: 16, speed: 4, trail: [] };
+// --- GAME CONFIG (All Magic Numbers) ---
+const CONFIG = {
+    player: {
+        size: 16,
+        speed: 4,
+        trailLength: 12
+    },
+    rumors: {
+        count: 11,
+        baseSize: 25,
+        sizeVariance: 30,          // Added to baseSize with Math.pow(random, 2)
+        damagePerSecond: 0.6,
+        reducedDamageThreshold: 66, // Confusion level where damage is halved
+        reducedDamageMultiplier: 0.5,
+        collisionRadius: 90,       // Base collision distance (scaled by stress)
+        pushDecay: 0.92,           // Friction on shockwave push
+        shockwaveForce: 25,
+        shockwaveRadius: 350
+    },
+    anchors: {
+        count: 4,
+        radius: 60,
+        chargeRate: 0.4,
+        decayRate: 0.5,
+        completionBonus: 20,       // Confusion reduction on complete
+        healingRate: 0.5          // Confusion reduction while standing on complete anchor
+    },
+    colleagues: {
+        count: 8,
+        speed: 1.0,
+        infectionRadius: 60,       // Scaled by stress
+        damageRadius: 50,
+        healRadius: 30,
+        healBonus: 15              // Confusion reduction on heal
+    },
+    stress: {
+        scaleMultiplierBase: 1,
+        scaleMultiplierMax: 1.3,
+        slowFactorDivisor: 140,
+        minSpeed: 0.5,
+        passiveRecoveryRate: 0.05
+    },
+    grid: {
+        size: 50,
+        scrollSpeed: 20
+    }
+};
+
+let player = { x: canvas.width / 2, y: canvas.height / 2, size: CONFIG.player.size, speed: CONFIG.player.speed, trail: [] };
 let keys = {};
 let confusion = 0;
 let gameTime = 0;
 let gameActive = false;
+let isPaused = false;
 let completedAnchors = 0;
+
+const pauseOverlay = document.getElementById('pause-overlay');
+const btnResume = document.getElementById('btn-resume');
 
 const rumorTexts = [
     "Externe Berater", "Keine Strategie", "Führungsvakuum", "Ressourcenmangel",
@@ -171,20 +223,21 @@ const shockwaves = [];
 const resonanceNotes = [AudioEngine.SCALE.C4, AudioEngine.SCALE.Eb4, AudioEngine.SCALE.G4, AudioEngine.SCALE.Bb4, AudioEngine.SCALE.C5];
 
 function initGame() {
-    for (let i = 0; i < 11; i++) {
+    for (let i = 0; i < CONFIG.rumors.count; i++) {
         rumors.push({
             x: Math.random() * canvas.width, y: Math.random() * canvas.height,
             text: rumorTexts[Math.floor(Math.random() * rumorTexts.length)],
             vx: (Math.random() - 0.5) * 1.5, vy: (Math.random() - 0.5) * 1.5,
-            size: 25 + Math.pow(Math.random(), 2) * 30, pulseOffset: Math.random() * 10, debrisAngle: Math.random() * Math.PI,
-            // NEW: Push force vectors
+            size: CONFIG.rumors.baseSize + Math.pow(Math.random(), 2) * CONFIG.rumors.sizeVariance,
+            pulseOffset: Math.random() * 10, debrisAngle: Math.random() * Math.PI,
             pushX: 0, pushY: 0
         });
     }
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < CONFIG.colleagues.count; i++) {
         colleagues.push({
             x: Math.random() * canvas.width, y: Math.random() * canvas.height,
-            vx: (Math.random() - 0.5) * 1.0, vy: (Math.random() - 0.5) * 1.0,
+            vx: (Math.random() - 0.5) * CONFIG.colleagues.speed,
+            vy: (Math.random() - 0.5) * CONFIG.colleagues.speed,
             isInfected: false, infectionTime: 0
         });
     }
@@ -204,19 +257,34 @@ function createAnchors() {
     quadrants.forEach((q, index) => {
         anchors.push({
             x: q[0] + Math.random() * (q[1] - q[0]), y: q[2] + Math.random() * (q[3] - q[2]),
-            text: availableTexts[index % availableTexts.length], radius: 60, rotation: Math.random() * Math.PI,
-            progress: 0, isComplete: false, lastNoteIndex: -1,
+            text: availableTexts[index % availableTexts.length], radius: CONFIG.anchors.radius,
+            rotation: Math.random() * Math.PI, progress: 0, isComplete: false, lastNoteIndex: -1,
             vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4
         });
     });
 }
 
-window.addEventListener('keydown', e => keys[e.key] = true);
+window.addEventListener('keydown', e => {
+    keys[e.key] = true;
+    if (e.key === 'Escape' && gameActive) togglePause();
+});
 window.addEventListener('keyup', e => keys[e.key] = false);
+
+function togglePause() {
+    isPaused = !isPaused;
+    pauseOverlay.style.display = isPaused ? 'flex' : 'none';
+    if (!isPaused) {
+        lastTime = 0; // Reset delta time to prevent jump
+        requestAnimationFrame(loop);
+    }
+}
+
 btnStart.addEventListener('click', () => {
     AudioEngine.init(); startScreen.style.display = 'none'; uiPanel.style.display = 'block';
     initGame(); gameActive = true; requestAnimationFrame(loop);
 });
+
+btnResume.addEventListener('click', () => togglePause());
 
 function spawnParticles(x, y, color, count = 1) {
     for (let i = 0; i < count; i++) {
@@ -249,9 +317,9 @@ let lastTime = 0;
 
 function update(dt) {
     gameTime += 0.02 * dt;
-    let stressScaleMultiplier = 1 + (confusion / 120) * 1.3;
-    let slowFactor = 1 - (confusion / 140);
-    let currentSpeed = Math.max(0.5, player.speed * slowFactor) * dt;
+    let stressScaleMultiplier = CONFIG.stress.scaleMultiplierBase + (confusion / 120) * CONFIG.stress.scaleMultiplierMax;
+    let slowFactor = 1 - (confusion / CONFIG.stress.slowFactorDivisor);
+    let currentSpeed = Math.max(CONFIG.stress.minSpeed, player.speed * slowFactor) * dt;
 
     if (keys['ArrowUp'] || keys['w']) player.y -= currentSpeed;
     if (keys['ArrowDown'] || keys['s']) player.y += currentSpeed;
@@ -261,7 +329,7 @@ function update(dt) {
     player.y = Math.max(10, Math.min(canvas.height - 10, player.y));
 
     player.trail.push({ x: player.x, y: player.y, alpha: 1 });
-    if (player.trail.length > 12) player.trail.shift();
+    if (player.trail.length > CONFIG.player.trailLength) player.trail.shift();
     player.trail.forEach(t => t.alpha -= 0.08 * dt);
 
     let onAnyAnchor = false;
@@ -271,7 +339,7 @@ function update(dt) {
         if (dist < a.radius) {
             onAnyAnchor = true;
             if (!a.isComplete) {
-                a.progress += 0.4 * dt;
+                a.progress += CONFIG.anchors.chargeRate * dt;
                 let noteStep = Math.floor(a.progress / 20);
                 if (noteStep > a.lastNoteIndex && noteStep < resonanceNotes.length) {
                     a.lastNoteIndex = noteStep;
@@ -279,13 +347,13 @@ function update(dt) {
                 }
                 if (a.progress >= 100) {
                     a.progress = 100; a.isComplete = true; completedAnchors++;
-                    serverCountLabel.innerText = `${completedAnchors}/4 SYSTEMS`;
-                    confusion -= 20; AudioEngine.playWinChord(); spawnParticles(a.x, a.y, COLORS.anchorDone, 30);
-                    if (completedAnchors === 4) gameOver(true);
+                    serverCountLabel.innerText = `${completedAnchors}/${CONFIG.anchors.count} SYSTEMS`;
+                    confusion -= CONFIG.anchors.completionBonus; AudioEngine.playWinChord(); spawnParticles(a.x, a.y, COLORS.anchorDone, 30);
+                    if (completedAnchors === CONFIG.anchors.count) gameOver(true);
                 }
-            } else { confusion -= 0.5 * dt; }
+            } else { confusion -= CONFIG.anchors.healingRate * dt; }
         } else if (!a.isComplete && a.progress > 0) {
-            a.progress -= 0.5 * dt; let currentStep = Math.floor(a.progress / 20);
+            a.progress -= CONFIG.anchors.decayRate * dt; let currentStep = Math.floor(a.progress / 20);
             if (currentStep < a.lastNoteIndex) a.lastNoteIndex = currentStep;
         }
 
@@ -305,8 +373,8 @@ function update(dt) {
         let naturalVx = (r.vx + Math.sin(gameTime + r.y / 100) * 0.5) * dt;
 
         // 2. APPLY SHOCKWAVE PUSH (With Decay)
-        r.pushX *= Math.pow(0.92, dt); // Friction adjusted for time
-        r.pushY *= Math.pow(0.92, dt);
+        r.pushX *= Math.pow(CONFIG.rumors.pushDecay, dt);
+        r.pushY *= Math.pow(CONFIG.rumors.pushDecay, dt);
 
         // 3. MOVE
         r.x += naturalVx + (r.pushX * dt);
@@ -319,17 +387,17 @@ function update(dt) {
         if (r.y < -50) r.y = canvas.height + 50; if (r.y > canvas.height + 50) r.y = -50;
 
         // Collision Player
-        if (Math.hypot(player.x - r.x, player.y - r.y) < 90 * stressScaleMultiplier) {
-            let damage = 0.6;
-            // Last third of life energy means confusion > 66.66
-            if (confusion > 66) damage *= 0.5;
+        if (Math.hypot(player.x - r.x, player.y - r.y) < CONFIG.rumors.collisionRadius * stressScaleMultiplier) {
+            let damage = CONFIG.rumors.damagePerSecond;
+            // Last third of life energy - reduced damage
+            if (confusion > CONFIG.rumors.reducedDamageThreshold) damage *= CONFIG.rumors.reducedDamageMultiplier;
 
             confusion += damage * dt;
             nearRumor = true;
         }
         // Infection
         colleagues.forEach(c => {
-            if (!c.isInfected && Math.hypot(c.x - r.x, c.y - r.y) < (60 * stressScaleMultiplier)) { c.isInfected = true; c.infectionTime = gameTime; }
+            if (!c.isInfected && Math.hypot(c.x - r.x, c.y - r.y) < (CONFIG.colleagues.infectionRadius * stressScaleMultiplier)) { c.isInfected = true; c.infectionTime = gameTime; }
         });
     });
 
@@ -338,12 +406,12 @@ function update(dt) {
         if (c.x < 0 || c.x > canvas.width) c.vx *= -1;
         if (c.y < 0 || c.y > canvas.height) c.vy *= -1;
         if (c.isInfected) {
-            if (Math.hypot(player.x - c.x, player.y - c.y) < 50) {
+            if (Math.hypot(player.x - c.x, player.y - c.y) < CONFIG.colleagues.damageRadius) {
                 confusion += 0.3 * dt;
-                if (Math.hypot(player.x - c.x, player.y - c.y) < 30) {
+                if (Math.hypot(player.x - c.x, player.y - c.y) < CONFIG.colleagues.healRadius) {
                     // HEAL EVENT
                     c.isInfected = false;
-                    confusion = Math.max(0, confusion - 15);
+                    confusion = Math.max(0, confusion - CONFIG.colleagues.healBonus);
                     AudioEngine.playHealSound();
                     spawnHealingParticles(c.x, c.y);
 
@@ -353,9 +421,9 @@ function update(dt) {
                     rumors.forEach(r => {
                         let dx = r.x - c.x; let dy = r.y - c.y;
                         let dist = Math.hypot(dx, dy);
-                        if (dist < 350) {
+                        if (dist < CONFIG.rumors.shockwaveRadius) {
                             let angle = Math.atan2(dy, dx);
-                            let force = 25; // Strong Impulse
+                            let force = CONFIG.rumors.shockwaveForce;
                             r.pushX += Math.cos(angle) * force;
                             r.pushY += Math.sin(angle) * force;
                         }
@@ -371,7 +439,7 @@ function update(dt) {
         if (shockwaves[i].alpha <= 0) shockwaves.splice(i, 1);
     }
 
-    if (!nearRumor && !onAnyAnchor && confusion > 0) confusion -= 0.05 * dt;
+    if (!nearRumor && !onAnyAnchor && confusion > 0) confusion -= CONFIG.stress.passiveRecoveryRate * dt;
     confusion = Math.max(0, Math.min(100, confusion));
     AudioEngine.updateStress(confusion);
     if (confusion >= 100) gameOver(false);
@@ -396,8 +464,8 @@ function draw() {
     // Draw Grid (Restored Element)
     ctx.strokeStyle = 'rgba(255, 0, 255, 0.15)'; // Subtle Magenta
     ctx.lineWidth = 1;
-    const gridSize = 50;
-    const offset = (gameTime * 20) % gridSize;
+    const gridSize = CONFIG.grid.size;
+    const offset = (gameTime * CONFIG.grid.scrollSpeed) % gridSize;
 
     for (let x = 0; x < canvas.width; x += gridSize) {
         ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
@@ -534,6 +602,8 @@ function drawRainbow(ctx, x, y, size) {
 }
 
 function loop(timestamp) {
+    if (isPaused) return;
+
     if (!lastTime) lastTime = timestamp;
     const deltaTime = (timestamp - lastTime) / 1000;
     lastTime = timestamp;
