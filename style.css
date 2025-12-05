@@ -213,3 +213,100 @@ button:hover {
     letter-spacing: 2px;
     text-transform: uppercase;
 }
+
+/* Mobile Controls */
+#mobile-controls {
+    display: none;
+    position: fixed;
+    z-index: 30;
+    pointer-events: none;
+}
+
+#mobile-controls.active {
+    display: block;
+}
+
+#joystick-zone {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 150px;
+    height: 150px;
+    pointer-events: auto;
+}
+
+#joystick-base {
+    width: 120px;
+    height: 120px;
+    background: rgba(61, 169, 252, 0.15);
+    border: 2px solid rgba(61, 169, 252, 0.4);
+    border-radius: 50%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#joystick-knob {
+    width: 50px;
+    height: 50px;
+    background: rgba(61, 169, 252, 0.6);
+    border: 2px solid rgba(61, 169, 252, 0.8);
+    border-radius: 50%;
+    position: absolute;
+    transition: none;
+    box-shadow: 0 0 15px rgba(61, 169, 252, 0.5);
+}
+
+#btn-mobile-pause {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    width: 50px;
+    height: 50px;
+    padding: 0;
+    margin: 0;
+    font-size: 24px;
+    background: rgba(15, 14, 23, 0.8);
+    border: 2px solid rgba(61, 169, 252, 0.5);
+    border-radius: 50%;
+    color: #3da9fc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: auto;
+    backdrop-filter: blur(5px);
+}
+
+#btn-mobile-pause:hover,
+#btn-mobile-pause:active {
+    background: rgba(61, 169, 252, 0.3);
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 768px) {
+    #ui-panel {
+        width: auto;
+        left: 10px;
+        right: 80px;
+        top: 10px;
+        padding: 10px;
+    }
+
+    #ui-title {
+        font-size: 12px;
+    }
+
+    h1 {
+        font-size: 32px;
+    }
+
+    .legend {
+        font-size: 14px;
+        padding: 0 20px;
+    }
+
+    #start-screen p {
+        padding: 0 20px;
+    }
+}

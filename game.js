@@ -202,6 +202,20 @@ let completedAnchors = 0;
 const pauseOverlay = document.getElementById('pause-overlay');
 const btnResume = document.getElementById('btn-resume');
 
+// --- MOBILE CONTROLS ---
+const mobileControls = document.getElementById('mobile-controls');
+const joystickZone = document.getElementById('joystick-zone');
+const joystickBase = document.getElementById('joystick-base');
+const joystickKnob = document.getElementById('joystick-knob');
+const btnMobilePause = document.getElementById('btn-mobile-pause');
+
+const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+let joystickInput = { x: 0, y: 0 };  // -1 to 1 for each axis
+let joystickActive = false;
+let joystickTouchId = null;
+let joystickCenter = { x: 0, y: 0 };
+const JOYSTICK_MAX_DISTANCE = 35;  // Max pixels knob can move from center
+
 const rumorTexts = [
     "Externe Berater", "Keine Strategie", "Führungsvakuum", "Ressourcenmangel",
     "Reorg der Reorg", "Silo-Denken", "Kontrollverlust", "Kopflosigkeit",
@@ -281,10 +295,82 @@ function togglePause() {
 
 btnStart.addEventListener('click', () => {
     AudioEngine.init(); startScreen.style.display = 'none'; uiPanel.style.display = 'block';
+    if (isMobile) mobileControls.classList.add('active');
     initGame(); gameActive = true; requestAnimationFrame(loop);
 });
 
 btnResume.addEventListener('click', () => togglePause());
+if (btnMobilePause) btnMobilePause.addEventListener('click', () => togglePause());
+
+// --- JOYSTICK TOUCH HANDLERS ---
+function handleJoystickStart(e) {
+    e.preventDefault();
+    const touch = e.changedTouches[0];
+    joystickTouchId = touch.identifier;
+    joystickActive = true;
+
+    const rect = joystickBase.getBoundingClientRect();
+    joystickCenter.x = rect.left + rect.width / 2;
+    joystickCenter.y = rect.top + rect.height / 2;
+
+    updateJoystickPosition(touch.clientX, touch.clientY);
+}
+
+function handleJoystickMove(e) {
+    if (!joystickActive) return;
+    e.preventDefault();
+
+    for (let touch of e.changedTouches) {
+        if (touch.identifier === joystickTouchId) {
+            updateJoystickPosition(touch.clientX, touch.clientY);
+            break;
+        }
+    }
+}
+
+function handleJoystickEnd(e) {
+    for (let touch of e.changedTouches) {
+        if (touch.identifier === joystickTouchId) {
+            joystickActive = false;
+            joystickTouchId = null;
+            joystickInput.x = 0;
+            joystickInput.y = 0;
+            joystickKnob.style.transform = 'translate(-50%, -50%)';
+            joystickKnob.style.left = '50%';
+            joystickKnob.style.top = '50%';
+            break;
+        }
+    }
+}
+
+function updateJoystickPosition(touchX, touchY) {
+    let dx = touchX - joystickCenter.x;
+    let dy = touchY - joystickCenter.y;
+    let distance = Math.hypot(dx, dy);
+
+    // Clamp to max distance
+    if (distance > JOYSTICK_MAX_DISTANCE) {
+        dx = (dx / distance) * JOYSTICK_MAX_DISTANCE;
+        dy = (dy / distance) * JOYSTICK_MAX_DISTANCE;
+        distance = JOYSTICK_MAX_DISTANCE;
+    }
+
+    // Update visual knob position
+    joystickKnob.style.left = `calc(50% + ${dx}px)`;
+    joystickKnob.style.top = `calc(50% + ${dy}px)`;
+
+    // Normalize to -1 to 1 range
+    joystickInput.x = dx / JOYSTICK_MAX_DISTANCE;
+    joystickInput.y = dy / JOYSTICK_MAX_DISTANCE;
+}
+
+// Attach touch listeners
+if (joystickZone) {
+    joystickZone.addEventListener('touchstart', handleJoystickStart, { passive: false });
+    joystickZone.addEventListener('touchmove', handleJoystickMove, { passive: false });
+    joystickZone.addEventListener('touchend', handleJoystickEnd);
+    joystickZone.addEventListener('touchcancel', handleJoystickEnd);
+}
 
 function spawnParticles(x, y, color, count = 1) {
     for (let i = 0; i < count; i++) {
@@ -325,6 +411,12 @@ function update(dt) {
     if (keys['ArrowDown'] || keys['s']) player.y += currentSpeed;
     if (keys['ArrowLeft'] || keys['a']) player.x -= currentSpeed;
     if (keys['ArrowRight'] || keys['d']) player.x += currentSpeed;
+
+    // Mobile joystick input (adds to keyboard movement)
+    if (joystickActive) {
+        player.x += joystickInput.x * currentSpeed;
+        player.y += joystickInput.y * currentSpeed;
+    }
     player.x = Math.max(10, Math.min(canvas.width - 10, player.x));
     player.y = Math.max(10, Math.min(canvas.height - 10, player.y));
 
